@@ -1,0 +1,146 @@
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>4. Sınıf Quiz Oyunu</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #d0eaff, #fef6e4);
+      text-align: center;
+      padding: 20px;
+    }
+    #girisEkrani, #quizEkrani, #sonucEkrani {
+      display: none;
+    }
+    .buton {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 10px;
+      margin: 10px;
+      cursor: pointer;
+    }
+    .buton:hover {
+      background-color: #0056b3;
+    }
+    .renkli-yazi {
+      font-size: 24px;
+      animation: renkli 2s infinite;
+    }
+    @keyframes renkli {
+      0% {color: red;}
+      25% {color: orange;}
+      50% {color: green;}
+      75% {color: blue;}
+      100% {color: purple;}
+    }
+  </style>
+</head>
+<body>
+  <div id="girisEkrani">
+    <h2>Adını gir:</h2>
+    <input type="text" id="kullaniciAdi" placeholder="Adın">
+    <p class="renkli-yazi">Öğretmenim ve Arkadaşlarım için</p>
+    <button class="buton" onclick="basla()">Başla</button>
+  </div>
+
+  <div id="quizEkrani">
+    <h2 id="kullaniciIsmi"></h2>
+    <p id="soruMetni"></p>
+    <div id="secenekler"></div>
+    <p id="durum"></p>
+    <p>Skor: <span id="skor">0</span></p>
+    <button class="buton" onclick="sonrakiSoru()">Sonraki</button>
+  </div>
+
+  <div id="sonucEkrani">
+    <h2>Quiz Bitti!</h2>
+    <p>Toplam Skor: <span id="toplamSkor"></span></p>
+    <button class="buton" onclick="yenidenBasla()">Tekrar Oyna</button>
+  </div>
+
+  <audio id="dogruSes" src="https://cdn.pixabay.com/audio/2022/03/15/audio_89e1f6f02a.mp3"></audio>
+  <audio id="yanlisSes" src="https://cdn.pixabay.com/audio/2022/03/15/audio_7f38d4cb7c.mp3"></audio>
+
+  <script>
+    const sorular = [
+      {soru: "Türkiye'nin başkenti neresidir?", secenekler: ["İstanbul", "Ankara", "İzmir", "Bursa"], cevap: "Ankara"},
+      {soru: "5 x 6 kaç eder?", secenekler: ["11", "30", "35", "25"], cevap: "30"},
+      {soru: "Güneş hangi gezegenin etrafında döner?", secenekler: ["Dünya", "Mars", "Hiçbiri", "Merkür"], cevap: "Hiçbiri"},
+      {soru: "'Çocuklar parka gitti.' cümlesindeki özne nedir?", secenekler: ["Parka", "Çocuklar", "Gitti", "Cümle yok"], cevap: "Çocuklar"},
+      {soru: "İnsan Hakları Evrensel Bildirgesi kaç yılında kabul edildi?", secenekler: ["1948", "1980", "1919", "2001"], cevap: "1948"},
+      {soru: "Namaz İslam'ın kaçıncı şartıdır?", secenekler: ["1", "2", "3", "4"], cevap: "2"},
+      {soru: "'How are you?' sorusunun Türkçesi nedir?", secenekler: ["Nasılsın?", "Nerelisin?", "Ne yapıyorsun?", "Kaç yaşındasın?"], cevap: "Nasılsın?"},
+    ];
+
+    let kullaniciAdi = "";
+    let skor = 0;
+    let soruIndex = 0;
+
+    function basla() {
+      kullaniciAdi = document.getElementById('kullaniciAdi').value;
+      document.getElementById('kullaniciIsmi').innerText = `Hoş geldin, ${kullaniciAdi}!`;
+      document.getElementById('girisEkrani').style.display = 'none';
+      document.getElementById('quizEkrani').style.display = 'block';
+      soruyuGoster();
+    }
+
+    function soruyuGoster() {
+      const s = sorular[soruIndex];
+      document.getElementById('soruMetni').innerText = s.soru;
+      const seceneklerDiv = document.getElementById('secenekler');
+      seceneklerDiv.innerHTML = '';
+      s.secenekler.forEach(secenek => {
+        const btn = document.createElement('button');
+        btn.innerText = secenek;
+        btn.className = 'buton';
+        btn.onclick = () => cevapKontrol(secenek);
+        seceneklerDiv.appendChild(btn);
+      });
+      document.getElementById('durum').innerText = '';
+    }
+
+    function cevapKontrol(secilen) {
+      const dogru = sorular[soruIndex].cevap;
+      if (secilen === dogru) {
+        document.getElementById('durum').innerText = "Doğru! Ekmek parası çıktı!";
+        document.getElementById('dogruSes').play();
+        skor++;
+        document.getElementById('skor').innerText = skor;
+      } else {
+        document.getElementById('durum').innerText = `Yanlış! Doğru cevap: ${dogru}`;
+        document.getElementById('yanlisSes').play();
+      }
+    }
+
+    function sonrakiSoru() {
+      soruIndex++;
+      if (soruIndex < sorular.length) {
+        soruyuGoster();
+      } else {
+        document.getElementById('quizEkrani').style.display = 'none';
+        document.getElementById('sonucEkrani').style.display = 'block';
+        document.getElementById('toplamSkor').innerText = skor;
+      }
+    }
+
+    function yenidenBasla() {
+      skor = 0;
+      soruIndex = 0;
+      document.getElementById('quizEkrani').style.display = 'block';
+      document.getElementById('sonucEkrani').style.display = 'none';
+      soruyuGoster();
+      document.getElementById('skor').innerText = skor;
+    }
+
+    window.onload = () => {
+      document.getElementById('girisEkrani').style.display = 'block';
+    }
+  </script>
+</body>
+</html>
